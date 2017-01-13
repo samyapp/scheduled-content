@@ -101,30 +101,52 @@ class ScheduledContent
 
         $paths = [];
         $day_names = $this->get_valid_day_names( $date , $this->get_csv_data( $this->content_path . '/named-days.csv' ) );
+        $period_names = $this->get_valid_period_names( $date , $this->get_csv_data( $this->content_path . '/named-periods.csv' ) );
 
+        $grouped_paths = [];
         foreach ( $paths as $path ) {
             if ( $this->matchDateTimeRange( $today, $time_of_day, $path ) ) { // YYYYMMDD-HHMM-HHMM.txt
-                $dated_paths[] = $path;
+                $grouped_paths[0][] = $path;
             }
             else if ( $this->matchDateAMPM( $today, $time_of_day, $path ) ) { // YYYYMMDD-AM.txt, YYYYMMDD-PM.txt
-                $dated_paths[] = $path;
+                $grouped_paths[1][] = $path;
             }
             else if ( $this->matchExact( $today, $path ) ) {  // YYYYMMDD.txt
-                $dated_paths[] = $path;
+                $grouped_paths[2][] = $path;
             }
             else {
                 $matched = false;
                 foreach ( $day_names as $name ) {
-                    if ( $this->matchDateTimeRange( $name, $time_of_day, $path ) ||  // christmas-HHMM-HHMM.txt
-                        $this->matchDateAMPM( $name, $time_of_day, $path ) ||   // christmas-AM.txt, christmas-PM.txt
-                        $this->matchExact( $name, $path ) ) {   // christmas.txt
-                        $dated_paths[] = $path;
+                    if ( $this->matchDateTimeRange( $name, $time_of_day, $path ) ) {  // christmas-HHMM-HHMM.txt
+                        $grouped_paths[3][] = $path;
                         $matched = true;
+                    }
+                    else if ( $this->matchDateAMPM( $name, $time_of_day, $path ) ) {   // christmas-AM.txt, christmas-PM.txt
+                        $grouped_paths[4][] = $path;
+                        $matched = true;
+                    }
+                    else if ( $this->matchExact( $name, $path ) ) {   // christmas.txt
+                        $grouped_paths[5][] = $path;
+                        $matched = true;
+                    }
+                    if ( $matched ) { // we have matched this path, so don't need to test any other named days
                         break;
                     }
                 }
                 if ( ! $matched ) {
-
+                    $month_day = substr( $today, 4 );
+                    if ( $this->matchDateTimeRange( $month_day, $time_of_day, $path ) ) { // MMDD-HHMM-HHMM.txt
+                        $grouped_paths[6][] = $path;
+                    }
+                    else if ( $this->matchDateAMPM( $month_day, $time_of_day, $path ) ) { // MMDD-AM.txt, MMDD-PM.txt
+                        $grouped_paths[7][] = $path;
+                    }
+                    else if ( $this->matchExact( $month_day, $path ) ) {  // MMDD.txt
+                        $grouped_paths[8][] = $path;
+                    }
+                    else {
+                        // check periods...
+                    }
                 }
             }
         }
