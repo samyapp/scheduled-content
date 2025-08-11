@@ -1,3 +1,6 @@
+# Archived, ancient code.
+
+
 === SY Scheduled Content ===
 Contributors: samyapp
 Tags: scheduler, scheduled content, calendar, daily content, daily prayer
